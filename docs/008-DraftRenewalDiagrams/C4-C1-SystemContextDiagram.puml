@@ -1,0 +1,24 @@
+@startuml C4_Elements
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+LAYOUT_AS_SKETCH()
+
+title Policy Renewal
+
+System_Ext(uris, "Uris", "Policy Management Platform")
+System(policyAdministration, "Uinsure Policy Adminstration System", "Manages the lifecycle of a policy")
+System(paymentService, "Uinsure Payments Service", "Manages payments & refunds by Credit Card & Direct Debit")
+System(docGen, "Uinsure Document Generation", "Manages communication with customers and generated templated documents")
+
+System_Ext(gocardless, "GoCardless", "Managed mandates and requests payments and refunds via Direct Debit")
+System_Ext(stripe, "Stripe", "Stores customer credit card details, requests payment & refunds via Credit Card")
+
+Rel(uris, policyAdministration, "Provides a list of Policies to Renew")
+Rel(policyAdministration, paymentService, "Requests Payments and Refunds for different payment types")
+Rel(policyAdministration, docGen, "Request communication be sent to customers")
+Rel(paymentService, gocardless, "Requests Mandate Setup, Payments & Refunds via Direct Debit")
+Rel(paymentService, stripe, "Requests Payments & Refunds via Credit Card")
+
+'Include Ratings Engine
+SHOW_LEGEND()
+
+@enduml

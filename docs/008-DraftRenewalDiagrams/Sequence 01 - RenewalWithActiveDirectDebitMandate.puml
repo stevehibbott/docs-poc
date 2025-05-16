@@ -1,0 +1,41 @@
+@startuml Renewal
+header Page Header
+footer Page %page% of %lastpage%
+
+title Renewing a Policy with an valid Direct Debit Mandate
+
+Participant "PolicyRenewalProcessor" as prp
+Participant "Policy Api" as policyService
+Database "Policy Database" as policyDb
+Participant "Payments Api" as paymentService
+Database "Payment Database" as paymentDatabase
+Participant "GoCardless" as goCardless
+
+autonumber
+loop For each policy to be renewed
+
+activate prp
+    prp -> policyService : Send Renewal \n with Price
+    activate policyService
+        policyService -> policyDb : Create Renewal
+        activate policyDb
+            policyDb --> policyService : Renewal Created (OK)
+        deactivate policyDb
+        policyService -> paymentService : Request Direct Debit Payment
+        activate paymentService
+            paymentService -> goCardless : Request payment
+            activate goCardless
+            goCardless --> paymentService : Payment requested (OK)
+            deactivate goCardless
+            paymentService -> paymentDatabase : Create Payment
+            activate paymentDatabase
+            paymentDatabase --> paymentService : Payment Created (OK)
+            deactivate paymentDatabase
+            paymentService --> policyService : Payment Requested (OK)
+        deactivate paymentService
+        policyService --> prp : Renewal Created (OK)
+    deactivate policyService
+deactivate prp
+end
+
+@enduml

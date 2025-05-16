@@ -1,0 +1,53 @@
+@startuml C4_Elements
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+LAYOUT_AS_SKETCH()
+
+title Policy Renewal - Direct Debit
+System_Ext(uris, "Uris", "Policy Management Platform")
+System_Ext(gocardless, "GoCardless", "Manages mandates and requests payments and refunds via Direct Debit")
+
+System(policyAdministration, "Uinsure Policy Adminstration System","Manages the lifecycle of a policy")
+System(paymentService, "Uinsure Payments Service","Manages payments & refunds by Credit Card & Direct Debit")
+
+System_Boundary(advisorPlatform, "Uinsure Advisor Platform") {
+
+}
+
+System_Boundary(policyAdministration, "Uinsure Payments Service") {
+    Container(policyApi, "Policy Api", "Azure Function", "")
+    ContainerDb(policyDatabase, "Payment Database", "Azure SQL", "", $sprite="msql_server")
+    Rel(policyApi, policyDatabase, "")
+
+    Container(policyRenewalProcessor, "Policy Renewal Processor", "Azure Data Factor", "Checks policies which need to be renewed and sends to Policy Api")
+    Container(customerPortal, "Customer Advisor Portal", "C#, ASP.NET", "Displays policy information and captures information for processing mid term adjustments ")
+
+    Rel(policyRenewalProcessor, policyApi, "")
+    Rel(customerPortal, policyApi, "")
+
+
+}
+
+
+System_Boundary(paymentService, "Uinsure Policy Adminstration System") {
+    Container(paymentsGoCardless, "GoCardless Function", "Azure Function", "")
+
+    ContainerDb(paymentsDatabase, "Payment Database", "Azure SQL", "", $sprite="msql_server")
+
+    ContainerDb(refundStatusNotificationTopic, "Refund Status Topic", "Azure Service Bus Topic", $tags=topic)
+    Rel(paymentsGoCardless, gocardless, "")
+    Rel(paymentsGoCardless, paymentsDatabase, "")
+    Rel(paymentsGoCardless, refundStatusNotificationTopic, "")
+}
+
+
+
+Rel(uris, advisorPlatform, "")
+
+Rel(policyApi, paymentsGoCardless, "Requests Payments and Refunds for different payment types")
+
+
+
+
+SHOW_LEGEND()
+
+@enduml

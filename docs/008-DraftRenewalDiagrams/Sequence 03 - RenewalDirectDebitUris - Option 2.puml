@@ -1,0 +1,75 @@
+@startuml Renewal
+header Page Header
+footer Page %page% of %lastpage%
+
+title Renewing a Uris Policy - Option 2
+
+Participant "PolicyRenewalProcessor" as prp
+Participant "Policy Api" as policyService
+Database "Policy Database" as policyDb
+Participant "Payments Api" as paymentService
+Database "Payment Database" as paymentDatabase
+Participant "GoCardless" as goCardless
+
+loop For each policy to be renewed
+autonumber 1.0
+prp -> paymentService
+activate prp
+
+        activate paymentService
+            paymentService -> goCardless : Create Billing Request
+            activate goCardless
+            goCardless --> paymentService : (OK)
+            deactivate goCardless
+            paymentService -> paymentDatabase : Create Mandate
+            activate paymentDatabase
+            paymentDatabase --> paymentService: Mandate Created (OK)
+            deactivate paymentDatabase
+            paymentService -> goCardless : Create Customer
+            activate goCardless
+            goCardless --> paymentService : (OK)
+            deactivate goCardless
+            paymentService -> goCardless : Create Bank Details
+            activate goCardless
+            goCardless --> paymentService : (OK)
+            deactivate goCardless
+            paymentService -> goCardless : Confirm Payer Details
+            activate goCardless
+            goCardless --> paymentService : (OK)
+            deactivate goCardless
+            paymentService -> goCardless : Fulfill Billing Request
+            activate goCardless
+            goCardless --> paymentService : (OK)
+            deactivate goCardless
+            paymentService -> paymentDatabase : Update Mandate
+            activate paymentDatabase
+            paymentDatabase --> paymentService: Mandate Updated (OK)
+            deactivate paymentDatabase
+            paymentService --> prp : Mandate Setup(OK)
+        deactivate paymentService
+
+    autonumber 2.0
+    prp -> policyService : Send Renewal \n with Price
+    activate policyService
+        policyService -> policyDb : Create Renewal
+        activate policyDb
+            policyDb --> policyService : Renewal Created (OK)
+        deactivate policyDb
+        policyService -> paymentService : Request Direct Debit Payment
+        activate paymentService
+            paymentService -> goCardless : Request payment
+            activate goCardless
+            goCardless --> paymentService : Payment requested (OK)
+            deactivate goCardless
+            paymentService -> paymentDatabase : Create Payment
+            activate paymentDatabase
+            paymentDatabase --> paymentService : Payment Created (OK)
+            deactivate paymentDatabase
+            paymentService --> policyService : Payment Requested (OK)
+        deactivate paymentService
+        policyService --> prp : Renewal Created (OK)
+    deactivate policyService
+deactivate prp
+end
+
+@enduml
