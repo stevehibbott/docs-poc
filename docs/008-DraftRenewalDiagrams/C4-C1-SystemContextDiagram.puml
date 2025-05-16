@@ -5,6 +5,7 @@ LAYOUT_AS_SKETCH()
 title Policy Renewal
 
 System_Ext(uris, "Uris", "Policy Management Platform")
+System(mySystem, "Steve H's System", "Manages Steve based activity")
 System(policyAdministration, "Uinsure Policy Adminstration System", "Manages the lifecycle of a policy")
 System(paymentService, "Uinsure Payments Service", "Manages payments & refunds by Credit Card & Direct Debit")
 System(docGen, "Uinsure Document Generation", "Manages communication with customers and generated templated documents")
@@ -13,6 +14,7 @@ System_Ext(gocardless, "GoCardless", "Managed mandates and requests payments and
 System_Ext(stripe, "Stripe", "Stores customer credit card details, requests payment & refunds via Credit Card")
 
 Rel(uris, policyAdministration, "Provides a list of Policies to Renew")
+Rel(uris, mySystem, "Provides a list SH stuff")
 Rel(policyAdministration, paymentService, "Requests Payments and Refunds for different payment types")
 Rel(policyAdministration, docGen, "Request communication be sent to customers")
 Rel(paymentService, gocardless, "Requests Mandate Setup, Payments & Refunds via Direct Debit")
